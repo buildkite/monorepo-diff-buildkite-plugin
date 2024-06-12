@@ -206,7 +206,7 @@ func generatePipeline(steps []Step, plugin Plugin) (*os.File, bool, error) {
 	}
 
 	if err = ioutil.WriteFile(tmp.Name(), data, 0644); err != nil {
-		return nil, fmt.Errorf("could not write step to temporary file: %v", err)
+		return nil, false, fmt.Errorf("could not write step to temporary file: %v", err)
 	}
 
 	// Returns the temporary file and a boolean indicating whether or not the pipeline has steps
