@@ -12,7 +12,7 @@ func setupLogger(logLevel string) {
 	ll, err := log.ParseLevel(logLevel)
 
 	if err != nil {
-		ll = log.InfoLevel
+		ll = log.DebugLevel
 	}
 
 	log.SetLevel(ll)
