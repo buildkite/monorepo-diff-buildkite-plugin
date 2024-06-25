@@ -26,7 +26,7 @@ func main() {
 
 	plugins := env("BUILDKITE_PLUGINS", "")
 
-	log.Debugf("received plugin: \n%v", plugins)
+	log.Infof("received plugin: \n%v", plugins)
 
 	plugin, err := initializePlugin(plugins)
 
