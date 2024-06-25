@@ -10,7 +10,7 @@ import (
 	"github.com/bmatcuk/doublestar/v2"
 	"github.com/buildkite/go-pipeline"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // PipelineGenerator generates pipeline file

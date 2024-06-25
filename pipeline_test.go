@@ -6,7 +6,7 @@ import (
 
 	"github.com/buildkite/go-pipeline"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 func mockGeneratePipeline(steps []pipeline.Step, plugin Plugin) (*os.File, bool, error) {
