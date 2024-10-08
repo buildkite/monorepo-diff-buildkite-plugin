@@ -26,153 +26,286 @@ steps:
   
   - wait:
 
-  - label: ":bomb: Triggers"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/one-match-one-miss"
-          log_level: "debug"
-          watch:
-            - path: "foo-service/"
-              config:
-                trigger: "foo-service"
-            - path: "hello-service/"
-              config:
-                trigger: "this-pipeline-does-not-exists"
-            - path: "foo-service/"
-              config:
-                command: "echo running command"
-          hooks:
-            - command: echo "command hook 1"
-            - command: echo "command hook 2"
+  - group: "🧑‍🔬 Run tests"
+    if: build.pull_request.repository.fork == false
+    steps:  
+      - label: ":bomb: Triggers"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/one-match-one-miss"
+              log_level: "debug"
+              watch:
+                - path: "foo-service/"
+                  config:
+                    trigger: "foo-service"
+                - path: "hello-service/"
+                  config:
+                    trigger: "this-pipeline-does-not-exists"
+                - path: "foo-service/"
+                  config:
+                    command: "echo running command"
+              hooks:
+                - command: echo "command hook 1"
+                - command: echo "command hook 2"
+    
+      - label: ":bomb: Testing notifications"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path:
+                    - "user-service/infrastructure/"
+                  config:
+                    command: "echo i-am-running-in-a-group"
+    
+      - label: ":bomb: Testing groups"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path:
+                    - "user-service/infrastructure/"
+                    - "product-service/infrastructure/"
+                  config:
+                    group: "my group"
+                    command: "echo i-am-running-in-a-group"
+    
+      - label: ":bomb: Testing hooks"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path: "user-service/"
+                  config:
+                    trigger: "user-service"
+                - path:
+                    - "user-service/infrastructure/"
+                    - "product-service/infrastructure/"
+                  config:
+                    trigger: "validate-infrastructure"
+                - path:
+                    - "do-not-trigger/"
+                  config:
+                    trigger: "this-pipeline-does-not-exists"
+              hooks:
+                - command: echo "command hook 1"
+    
+      - label: ":bomb: Testing wait"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path:
+                    - "user-service/infrastructure/"
+                    - "product-service/infrastructure/"
+                  config:
+                    command: "echo i-am-running"
+              wait: true
+    
+      - label: ":bomb: Testing triggers and commands"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/commands-or-triggers"
+              watch:
+                - path: "user-service/"
+                  config:
+                    trigger: "user-service"
+                - path:
+                    - "hello/bin/"
+                    - "world/bin/"
+                  config:
+                    command: "echo hello-world"
+                - path:
+                    - "global/"
+                  config:
+                    command: "buildkite-agent pipeline upload ./e2e/global/.buildkite/pipeline.yml"
+                - path:
+                    - "do-not-trigger/"
+                  config:
+                    trigger: "this-pipeline-does-not-exists"
+                - path:
+                    - "do-not-run-command/"
+                  config:
+                    command: "echo this-does-not-run"
+                - path:
+                    - "global/"
+                  config:
+                    group: "this is a group"
+                    command: "echo this-does-not-run"
+    
+      - label: ":testtube: Testing default config"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/commands-or-triggers"
+              watch:
+                - path: "not_a_path/"
+                  config:
+                    command: echo "This shouldn't run"
+                - default:
+                    command: "echo hello-world"
+    
+      - label: ":testtube: Testing default config with map"
+        plugins:
+          - artifacts#v1.9.2:
+              download:
+                - "monorepo-diff-buildkite-plugin"
+          - monorepo-diff#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/commands-or-triggers"
+              watch:
+                - path: "not_a_path/"
+                  config:
+                    command: echo "This shouldn't run"
+                - default:
+                    config:
+                      command: "echo hello-world"
 
-  - label: ":bomb: Testing notifications"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/multiple-paths"
-          watch:
-            - path:
-                - "user-service/infrastructure/"
-              config:
-                command: "echo i-am-running-in-a-group"
-
-  - label: ":bomb: Testing groups"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/multiple-paths"
-          watch:
-            - path:
-                - "user-service/infrastructure/"
-                - "product-service/infrastructure/"
-              config:
-                group: "my group"
-                command: "echo i-am-running-in-a-group"
-
-  - label: ":bomb: Testing hooks"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/multiple-paths"
-          watch:
-            - path: "user-service/"
-              config:
-                trigger: "user-service"
-            - path:
-                - "user-service/infrastructure/"
-                - "product-service/infrastructure/"
-              config:
-                trigger: "validate-infrastructure"
-            - path:
-                - "do-not-trigger/"
-              config:
-                trigger: "this-pipeline-does-not-exists"
-          hooks:
-            - command: echo "command hook 1"
-
-  - label: ":bomb: Testing wait"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/multiple-paths"
-          watch:
-            - path:
-                - "user-service/infrastructure/"
-                - "product-service/infrastructure/"
-              config:
-                command: "echo i-am-running"
-          wait: true
-
-  - label: ":bomb: Testing triggers and commands"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/commands-or-triggers"
-          watch:
-            - path: "user-service/"
-              config:
-                trigger: "user-service"
-            - path:
-                - "hello/bin/"
-                - "world/bin/"
-              config:
-                command: "echo hello-world"
-            - path:
-                - "global/"
-              config:
-                command: "buildkite-agent pipeline upload ./e2e/global/.buildkite/pipeline.yml"
-            - path:
-                - "do-not-trigger/"
-              config:
-                trigger: "this-pipeline-does-not-exists"
-            - path:
-                - "do-not-run-command/"
-              config:
-                command: "echo this-does-not-run"
-            - path:
-                - "global/"
-              config:
-                group: "this is a group"
-                command: "echo this-does-not-run"
-
-  - label: ":testtube: Testing default config"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/commands-or-triggers"
-          watch:
-            - path: "not_a_path/"
-              config:
-                command: echo "This shouldn't run"
-            - default:
-                command: "echo hello-world"
-
-  - label: ":testtube: Testing default config with map"
-    plugins:
-      - artifacts#v1.9.2:
-          download:
-            - "monorepo-diff-buildkite-plugin"
-      - monorepo-diff#${BUILDKITE_COMMIT}:
-          diff: "cat ./e2e/commands-or-triggers"
-          watch:
-            - path: "not_a_path/"
-              config:
-                command: echo "This shouldn't run"
-            - default:
-                config:
-                  command: "echo hello-world"
+  - group: "🧑‍🔬 Run tests"
+    if: build.pull_request.repository.fork == true
+    steps:  
+      - label: ":bomb: Triggers"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/one-match-one-miss"
+              log_level: "debug"
+              watch:
+                - path: "foo-service/"
+                  config:
+                    trigger: "foo-service"
+                - path: "hello-service/"
+                  config:
+                    trigger: "this-pipeline-does-not-exists"
+                - path: "foo-service/"
+                  config:
+                    command: "echo running command"
+              hooks:
+                - command: echo "command hook 1"
+                - command: echo "command hook 2"
+    
+      - label: ":bomb: Testing notifications"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path:
+                    - "user-service/infrastructure/"
+                  config:
+                    command: "echo i-am-running-in-a-group"
+    
+      - label: ":bomb: Testing groups"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path:
+                    - "user-service/infrastructure/"
+                    - "product-service/infrastructure/"
+                  config:
+                    group: "my group"
+                    command: "echo i-am-running-in-a-group"
+    
+      - label: ":bomb: Testing hooks"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path: "user-service/"
+                  config:
+                    trigger: "user-service"
+                - path:
+                    - "user-service/infrastructure/"
+                    - "product-service/infrastructure/"
+                  config:
+                    trigger: "validate-infrastructure"
+                - path:
+                    - "do-not-trigger/"
+                  config:
+                    trigger: "this-pipeline-does-not-exists"
+              hooks:
+                - command: echo "command hook 1"
+    
+      - label: ":bomb: Testing wait"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/multiple-paths"
+              watch:
+                - path:
+                    - "user-service/infrastructure/"
+                    - "product-service/infrastructure/"
+                  config:
+                    command: "echo i-am-running"
+              wait: true
+    
+      - label: ":bomb: Testing triggers and commands"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/commands-or-triggers"
+              watch:
+                - path: "user-service/"
+                  config:
+                    trigger: "user-service"
+                - path:
+                    - "hello/bin/"
+                    - "world/bin/"
+                  config:
+                    command: "echo hello-world"
+                - path:
+                    - "global/"
+                  config:
+                    command: "buildkite-agent pipeline upload ./e2e/global/.buildkite/pipeline.yml"
+                - path:
+                    - "do-not-trigger/"
+                  config:
+                    trigger: "this-pipeline-does-not-exists"
+                - path:
+                    - "do-not-run-command/"
+                  config:
+                    command: "echo this-does-not-run"
+                - path:
+                    - "global/"
+                  config:
+                    group: "this is a group"
+                    command: "echo this-does-not-run"
+    
+      - label: ":testtube: Testing default config"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/commands-or-triggers"
+              watch:
+                - path: "not_a_path/"
+                  config:
+                    command: echo "This shouldn't run"
+                - default:
+                    command: "echo hello-world"
+    
+      - label: ":testtube: Testing default config with map"
+        plugins:
+          - ${BUILDKITE_PULL_REQUEST_REPO}#${BUILDKITE_COMMIT}:
+              diff: "cat ./e2e/commands-or-triggers"
+              watch:
+                - path: "not_a_path/"
+                  config:
+                    command: echo "This shouldn't run"
+                - default:
+                    config:
+                      command: "echo hello-world"
