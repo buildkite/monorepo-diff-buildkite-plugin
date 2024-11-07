@@ -15,6 +15,9 @@ WORKDIR /plugin
 # Copy the plugin code from the previous stage to lint it
 COPY --from=go /plugin /plugin
 
+# Ensure plugin.yml is copied to the right place
+COPY plugin.yml /plugin/plugin.yml  # Add this line to copy plugin.yml into the container
+
 # Run the Buildkite plugin linter to validate the plugin
 RUN plugin-linter --id buildkite-plugins/monorepo-diff
 
@@ -24,9 +27,15 @@ FROM golang:1.20 as test-stage
 WORKDIR /plugin
 
 # Copy the plugin code and artifacts from previous stages
+
 COPY --from=go /plugin /plugin
 COPY tests /plugin/tests
 COPY hooks /plugin/hooks
+
+COPY --from=go \
+  /plugin/dist/monorepo-diff-buildkite-plugin_linux_amd64_v1/monorepo-diff-buildkite-plugin \
+  monorepo-diff-buildkite-plugin
+
 
 # Run the plugin tests
 CMD ["go", "test", "-race", "-coverprofile=coverage.out", "-covermode=atomic"]

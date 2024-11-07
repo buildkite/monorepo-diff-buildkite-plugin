@@ -367,11 +367,11 @@ func parseEnv(raw interface{}) (map[string]string, error) {
 
 func getPluginName(s string) string {
 	ref := s
-	if strings.HasPrefix(ref, "github.com/") && ! strings.Contains(ref, "://") {
+	if strings.HasPrefix(ref, "github.com/") && !strings.Contains(ref, "://") {
 		ref = "https://" + ref
 	}
 
-	u, err := url.Parse(ref);
+	u, err := url.Parse(ref)
 	// if URL could not be parsed, assume it is a direct reference
 	if err != nil {
 		return s

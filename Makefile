@@ -31,7 +31,7 @@ quality:
 	go fmt
 	go mod tidy
 ifneq (${HAS_DOCKER},)
-	docker run --rm buildkite/plugin-linter:latest --id buildkite-plugins/monorepo-diff
+	docker run --rm buildkite/plugin-linter --id buildkite-plugins/monorepo-diff
 endif
 
 .PHONY: build

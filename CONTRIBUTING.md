@@ -28,11 +28,11 @@ Run `make test` to run all tests and generate coverage reports before submitting
 
 To write the `bats` tests for plugin,
 1. Modify the tests
-2. Run `docker-compose build plugin_test && docker-compose run --rm plugin_test`
+2. Run ` make build-docker-test && make test-docker` to build the docker image and execute the tests in the Docker container.`
 
 ## Formatting
 
-All code must be formatted with `gofmt` (with the latest Go version) and pass `go vet`. The plugin must be linted with [buildkite-plugin-linter](https://github.com/buildkite-plugins/buildkite-plugin-linter). Run `make quality` to run all formatting checks.
+All code must be formatted with `gofmt` (with the latest Go version) and pass `go vet`. The plugin must be linted with [buildkite-plugin-linter](https://github.com/buildkite-plugins/buildkite-plugin-linter). 
 
 ## Releasing
 
