@@ -13,13 +13,13 @@ test-go:
 .PHONY: build-docker-test
 build-docker-test:
 ifneq (${HAS_DOCKER},)
-	docker-compose build plugin_test
+	docker build -t ${NAME} .
 endif
 
 .PHONY: test-docker
 test-docker: build-docker-test
 ifneq (${HAS_DOCKER},)
-	docker-compose run --rm plugin_test
+	docker run --rm ${NAME} go test -race -coverprofile=coverage.out -covermode=atomic
 endif
 
 .PHONY: test
@@ -31,7 +31,7 @@ quality:
 	go fmt
 	go mod tidy
 ifneq (${HAS_DOCKER},)
-	docker-compose run --rm plugin_lint
+	docker run --rm buildkite/plugin-linter:latest --id buildkite-plugins/monorepo-diff
 endif
 
 .PHONY: build
