@@ -339,7 +339,7 @@ func TestPipelinesStepsToTrigger(t *testing.T) {
 				{Trigger: "service-1"},
 			},
 		},
-		"step is included even when one of the files is skipped": {
+		"step is not included if one of the files is skipped": {
 			ChangedFiles: []string{
 				"docs/text.secret.txt",
 				"docs/text.txt",
@@ -356,7 +356,6 @@ func TestPipelinesStepsToTrigger(t *testing.T) {
 				}},
 			Expected: []Step{
 				{Trigger: "service-1"},
-				{Trigger: "service-2"},
 			},
 		},
 		"fails if not path is included": {
