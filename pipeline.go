@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v2"
@@ -109,32 +108,42 @@ func stepsToTrigger(files []string, watch []WatchConfig) ([]Step, error) {
 			defaultStep = &w.Step
 			continue
 		}
-		for _, p := range w.Paths {
-			for _, f := range files {
-				match, err := matchPath(p, f)
 
-				skip := false
-				for _, sp := range w.SkipPaths {
-					skipMatch, errSkip := matchPath(sp, f)
+		match := false
+		skip := false
+		for _, f := range files {
+			for _, p := range w.Paths {
 
-					if errSkip != nil {
-						return nil, errSkip
-					}
-
-					if skipMatch {
-						skip = true
-					}
-				}
-
+				m, err := matchPath(p, f)
 				if err != nil {
 					return nil, err
 				}
 
-				if match && !skip {
-					steps = append(steps, w.Step)
+				if m {
+					log.Printf("matched: %s\n", f)
+					match = true
 					break
 				}
 			}
+
+			for _, sp := range w.SkipPaths {
+
+				sm, err := matchPath(sp, f)
+				if err != nil {
+					return nil, err
+				}
+
+				if sm {
+					log.Printf("skipped: %s\n", f)
+					skip = true
+					break
+				}
+			}
+		}
+
+		if match && !skip {
+			log.Printf("adding step: %s\n", w.Step.Trigger)
+			steps = append(steps, w.Step)
 		}
 	}
 
@@ -142,7 +151,7 @@ func stepsToTrigger(files []string, watch []WatchConfig) ([]Step, error) {
 		steps = append(steps, *defaultStep)
 	}
 
-	return dedupSteps(steps), nil
+	return steps, nil
 }
 
 // matchPath checks if the file f matches the path p.
@@ -163,25 +172,6 @@ func matchPath(p string, f string) (bool, error) {
 		return true, nil
 	}
 	return false, nil
-}
-
-func dedupSteps(steps []Step) []Step {
-	unique := []Step{}
-	for _, p := range steps {
-		duplicate := false
-		for _, t := range unique {
-			if reflect.DeepEqual(p, t) {
-				duplicate = true
-				break
-			}
-		}
-
-		if !duplicate {
-			unique = append(unique, p)
-		}
-	}
-
-	return unique
 }
 
 func generatePipeline(steps []Step, plugin Plugin) (*os.File, bool, error) {
